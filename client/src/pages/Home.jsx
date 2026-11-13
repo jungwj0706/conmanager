@@ -22,7 +22,7 @@ function ScheduleList({ items, empty }) {
   );
 }
 
-function PublicHome({ contests, reviews, loading }) {
+function PublicHome({ contests, reviews, loading, error }) {
   return (
     <>
       <section>
@@ -31,7 +31,8 @@ function PublicHome({ contests, reviews, loading }) {
           <Link to="/contests">전체 보기</Link>
         </div>
         {loading && <p className="loading">불러오는 중...</p>}
-        {!loading && contests.length === 0 && <p className="empty">아직 등록된 대회 정보가 없습니다.</p>}
+        {error && <p className="error">{error}</p>}
+        {!loading && !error && contests.length === 0 && <p className="empty">아직 등록된 대회 정보가 없습니다.</p>}
         <div className="card-list">
           {contests.map((contest) => (
             <ContestCard key={contest.id} contest={contest} />
@@ -44,7 +45,7 @@ function PublicHome({ contests, reviews, loading }) {
           <h2 style={{ fontFamily: 'var(--serif)', margin: 0 }}>최신 후기</h2>
           <Link to="/reviews">전체 보기</Link>
         </div>
-        {!loading && reviews.length === 0 && <p className="empty">아직 작성된 후기가 없습니다.</p>}
+        {!loading && !error && reviews.length === 0 && <p className="empty">아직 작성된 후기가 없습니다.</p>}
         <div className="card-list">
           {reviews.map((review) => (
             <ReviewCard key={review.id} review={review} />
@@ -61,11 +62,13 @@ export default function Home() {
   const [reviews, setReviews] = useState([]);
   const [dash, setDash] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
 
   useEffect(() => {
     let ignore = false;
     (async () => {
       setLoading(true);
+      setError('');
       try {
         if (user) {
           const { data } = await api.get('/home');
@@ -79,11 +82,12 @@ export default function Home() {
           setContests(contestRows.slice(0, 4));
           setReviews(reviewRows.slice(0, 4));
         }
-      } catch {
+      } catch (err) {
         if (!ignore) {
           setContests([]);
           setReviews([]);
           setDash(null);
+          setError(err.response?.data?.message || '목록을 불러오지 못했습니다.');
         }
       } finally {
         if (!ignore) setLoading(false);
@@ -119,6 +123,7 @@ export default function Home() {
       {user ? (
         <>
           {loading && <p className="loading">불러오는 중...</p>}
+          {error && <p className="error">{error}</p>}
           {dash && (
             <>
               <div className="dash-grid">
@@ -145,7 +150,7 @@ export default function Home() {
           )}
         </>
       ) : (
-        <PublicHome contests={contests} reviews={reviews} loading={loading} />
+        <PublicHome contests={contests} reviews={reviews} loading={loading} error={error} />
       )}
     </div>
   );

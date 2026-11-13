@@ -73,7 +73,7 @@ router.patch('/:id/final', authRequired, async (req, res, next) => {
     ]);
     res.json(rows);
   } catch (err) {
-    await conn.rollback();
+    try { await conn.rollback(); } catch { /* 트랜잭션 시작 전 오류일 수 있음 */ }
     next(err);
   } finally {
     conn.release();

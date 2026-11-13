@@ -153,7 +153,7 @@ router.post('/from-contest/:contestId', async (req, res, next) => {
     await conn.commit();
     res.status(201).json(await getDetail(result.insertId, req.user.id));
   } catch (err) {
-    await conn.rollback();
+    try { await conn.rollback(); } catch { /* 트랜잭션 시작 전 오류일 수 있음 */ }
     next(err);
   } finally {
     conn.release();
@@ -195,7 +195,7 @@ router.post('/', async (req, res, next) => {
     await conn.commit();
     res.status(201).json(await getDetail(result.insertId, req.user.id));
   } catch (err) {
-    await conn.rollback();
+    try { await conn.rollback(); } catch { /* 트랜잭션 시작 전 오류일 수 있음 */ }
     next(err);
   } finally {
     conn.release();

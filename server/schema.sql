@@ -1,0 +1,105 @@
+CREATE DATABASE IF NOT EXISTS db_programming_project_20417 DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+USE db_programming_project_20417;
+
+CREATE TABLE IF NOT EXISTS users (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  email VARCHAR(100) NOT NULL UNIQUE,
+  password VARCHAR(255) NOT NULL,
+  nickname VARCHAR(50) NOT NULL,
+  points INT NOT NULL DEFAULT 0,
+  created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+);
+
+CREATE TABLE IF NOT EXISTS contests (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  user_id INT NOT NULL,
+  title VARCHAR(200) NOT NULL,
+  organizer VARCHAR(100),
+  category VARCHAR(50),
+  url VARCHAR(500) UNIQUE,
+  apply_end_date DATE,
+  event_start DATE,
+  event_end DATE,
+  location VARCHAR(100),
+  fee INT DEFAULT 0,
+  description TEXT,
+  created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+);
+
+CREATE TABLE IF NOT EXISTS reviews (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  user_id INT NOT NULL,
+  contest_id INT NOT NULL,
+  title VARCHAR(200) NOT NULL,
+  result ENUM('none','finalist','award') NOT NULL DEFAULT 'none',
+  difficulty TINYINT NOT NULL,
+  prep_period VARCHAR(50),
+  team_size TINYINT,
+  prep_process TEXT,
+  cautions TEXT,
+  tips TEXT,
+  created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  UNIQUE (user_id, contest_id),
+  FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+  FOREIGN KEY (contest_id) REFERENCES contests(id) ON DELETE CASCADE
+);
+
+CREATE TABLE IF NOT EXISTS my_contests (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  user_id INT NOT NULL,
+  source_contest_id INT NULL,
+  title VARCHAR(200) NOT NULL,
+  organizer VARCHAR(100),
+  location VARCHAR(100),
+  fee INT DEFAULT 0,
+  url VARCHAR(500),
+  status ENUM('interest','planned','ongoing','done') NOT NULL DEFAULT 'interest',
+  created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+  FOREIGN KEY (source_contest_id) REFERENCES contests(id) ON DELETE SET NULL
+);
+
+CREATE TABLE IF NOT EXISTS schedules (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  my_contest_id INT NOT NULL,
+  title VARCHAR(100) NOT NULL,
+  due_date DATE NOT NULL,
+  FOREIGN KEY (my_contest_id) REFERENCES my_contests(id) ON DELETE CASCADE
+);
+
+CREATE TABLE IF NOT EXISTS checklists (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  my_contest_id INT NOT NULL,
+  schedule_id INT NULL,
+  content VARCHAR(300) NOT NULL,
+  is_done TINYINT(1) NOT NULL DEFAULT 0,
+  FOREIGN KEY (my_contest_id) REFERENCES my_contests(id) ON DELETE CASCADE,
+  FOREIGN KEY (schedule_id) REFERENCES schedules(id) ON DELETE SET NULL
+);
+
+CREATE TABLE IF NOT EXISTS ideas (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  my_contest_id INT NOT NULL,
+  title VARCHAR(200) NOT NULL,
+  problem TEXT,
+  solution TEXT,
+  features TEXT,
+  tech_stack VARCHAR(300),
+  effect TEXT,
+  ref_link VARCHAR(500),
+  is_final TINYINT(1) NOT NULL DEFAULT 0,
+  FOREIGN KEY (my_contest_id) REFERENCES my_contests(id) ON DELETE CASCADE
+);
+
+CREATE TABLE IF NOT EXISTS memos (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  my_contest_id INT NOT NULL,
+  content TEXT NOT NULL,
+  created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  FOREIGN KEY (my_contest_id) REFERENCES my_contests(id) ON DELETE CASCADE
+);

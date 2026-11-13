@@ -2,6 +2,9 @@ import { useEffect, useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import api from '../api';
 import Modal from '../components/Modal';
+import ChecklistPanel from '../components/ChecklistPanel';
+import IdeaBoard from '../components/IdeaBoard';
+import MemoPanel from '../components/MemoPanel';
 import { STATUS_BADGE, STATUS_LABEL, formatDday } from '../format';
 
 const STATUSES = ['interest', 'planned', 'ongoing', 'done'];
@@ -15,6 +18,7 @@ export default function MyContestDetail() {
   const [confirmOpen, setConfirmOpen] = useState(false);
   const [scheduleForm, setScheduleForm] = useState({ title: '', due_date: '' });
   const [editing, setEditing] = useState(null);
+  const [tab, setTab] = useState('schedules');
 
   const load = async () => {
     const { data } = await api.get(`/my-contests/${id}`);
@@ -138,8 +142,23 @@ export default function MyContestDetail() {
         )}
       </section>
 
-      <section style={{ marginTop: 28 }}>
-        <h2 style={{ fontFamily: 'var(--serif)' }}>일정</h2>
+      <div className="tabs" style={{ marginTop: 28 }}>
+        <button type="button" className={`tab ${tab === 'schedules' ? 'active' : ''}`} onClick={() => setTab('schedules')}>
+          일정
+        </button>
+        <button type="button" className={`tab ${tab === 'checklists' ? 'active' : ''}`} onClick={() => setTab('checklists')}>
+          체크리스트
+        </button>
+        <button type="button" className={`tab ${tab === 'ideas' ? 'active' : ''}`} onClick={() => setTab('ideas')}>
+          아이디어
+        </button>
+        <button type="button" className={`tab ${tab === 'memos' ? 'active' : ''}`} onClick={() => setTab('memos')}>
+          메모
+        </button>
+      </div>
+
+      {tab === 'schedules' && (
+      <section>
         {item.schedules.length === 0 && <p className="empty">아직 일정이 없습니다.</p>}
         <div className="card-list">
           {item.schedules.map((schedule) => (
@@ -206,6 +225,13 @@ export default function MyContestDetail() {
           </button>
         </form>
       </section>
+      )}
+
+      {tab === 'checklists' && (
+        <ChecklistPanel item={item} onChanged={load} onError={setError} />
+      )}
+      {tab === 'ideas' && <IdeaBoard item={item} onChanged={load} onError={setError} />}
+      {tab === 'memos' && <MemoPanel item={item} onChanged={load} onError={setError} />}
 
       {error && <p className="error">{error}</p>}
 

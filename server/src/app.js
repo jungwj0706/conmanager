@@ -13,6 +13,9 @@ app.use('/api/contests', require('./routes/contests'));
 app.use('/api/reviews', require('./routes/reviews'));
 app.use('/api/my-contests', require('./routes/myContests'));
 app.use('/api/schedules', require('./routes/schedules'));
+app.use('/api/checklists', require('./routes/checklists'));
+app.use('/api/ideas', require('./routes/ideas').router);
+app.use('/api/memos', require('./routes/memos'));
 app.use('/api/home', require('./routes/home'));
 
 app.use((err, req, res, next) => {

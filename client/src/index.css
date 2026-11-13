@@ -255,7 +255,8 @@ main {
 
 .field input,
 .field select,
-.field textarea {
+.field textarea,
+.card textarea {
   width: 100%;
   border: 1px solid var(--line);
   background: #fff;

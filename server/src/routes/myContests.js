@@ -2,6 +2,7 @@ const express = require('express');
 const pool = require('../db');
 const { authRequired } = require('../middleware/auth');
 const HttpError = require('../httpError');
+const { ideaPayload } = require('./ideas');
 
 const router = express.Router();
 const STATUSES = ['interest', 'planned', 'ongoing', 'done'];
@@ -245,6 +246,94 @@ router.delete('/:id', async (req, res, next) => {
       throw new HttpError(404, '내 대회를 찾을 수 없습니다.');
     }
     res.json({ message: '내 대회를 삭제했습니다.' });
+  } catch (err) {
+    next(err);
+  }
+});
+
+router.get('/:id/checklists', async (req, res, next) => {
+  try {
+    await assertOwner(req.params.id, req.user.id);
+    const [rows] = await pool.query('SELECT * FROM checklists WHERE my_contest_id = ? ORDER BY id ASC', [
+      req.params.id,
+    ]);
+    res.json(rows);
+  } catch (err) {
+    next(err);
+  }
+});
+
+router.post('/:id/checklists', async (req, res, next) => {
+  try {
+    await assertOwner(req.params.id, req.user.id);
+    const content = emptyToNull(req.body?.content);
+    if (!content) throw new HttpError(400, '체크리스트 내용을 입력하세요.');
+    const scheduleId = req.body?.schedule_id ? Number(req.body.schedule_id) : null;
+    const [result] = await pool.query(
+      'INSERT INTO checklists (my_contest_id, schedule_id, content) VALUES (?, ?, ?)',
+      [req.params.id, scheduleId, content]
+    );
+    const [rows] = await pool.query('SELECT * FROM checklists WHERE id = ?', [result.insertId]);
+    res.status(201).json(rows[0]);
+  } catch (err) {
+    next(err);
+  }
+});
+
+router.get('/:id/ideas', async (req, res, next) => {
+  try {
+    await assertOwner(req.params.id, req.user.id);
+    const [rows] = await pool.query(
+      'SELECT * FROM ideas WHERE my_contest_id = ? ORDER BY is_final DESC, id DESC',
+      [req.params.id]
+    );
+    res.json(rows);
+  } catch (err) {
+    next(err);
+  }
+});
+
+router.post('/:id/ideas', async (req, res, next) => {
+  try {
+    await assertOwner(req.params.id, req.user.id);
+    const data = ideaPayload(req.body || {});
+    const [result] = await pool.query(
+      `INSERT INTO ideas
+        (my_contest_id, title, problem, solution, features, tech_stack, effect, ref_link)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
+      [req.params.id, data.title, data.problem, data.solution, data.features, data.tech_stack, data.effect, data.ref_link]
+    );
+    const [rows] = await pool.query('SELECT * FROM ideas WHERE id = ?', [result.insertId]);
+    res.status(201).json(rows[0]);
+  } catch (err) {
+    next(err);
+  }
+});
+
+router.get('/:id/memos', async (req, res, next) => {
+  try {
+    await assertOwner(req.params.id, req.user.id);
+    const [rows] = await pool.query(
+      'SELECT * FROM memos WHERE my_contest_id = ? ORDER BY created_at DESC, id DESC',
+      [req.params.id]
+    );
+    res.json(rows);
+  } catch (err) {
+    next(err);
+  }
+});
+
+router.post('/:id/memos', async (req, res, next) => {
+  try {
+    await assertOwner(req.params.id, req.user.id);
+    const content = emptyToNull(req.body?.content);
+    if (!content) throw new HttpError(400, '메모 내용을 입력하세요.');
+    const [result] = await pool.query('INSERT INTO memos (my_contest_id, content) VALUES (?, ?)', [
+      req.params.id,
+      content,
+    ]);
+    const [rows] = await pool.query('SELECT * FROM memos WHERE id = ?', [result.insertId]);
+    res.status(201).json(rows[0]);
   } catch (err) {
     next(err);
   }

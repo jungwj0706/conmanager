@@ -3,20 +3,30 @@ import { Link } from 'react-router-dom';
 import api from '../api';
 import { useAuth } from '../context/AuthContext';
 import ContestCard from '../components/ContestCard';
+import ReviewCard from '../components/ReviewCard';
 
 export default function Home() {
   const { user } = useAuth();
   const [contests, setContests] = useState([]);
+  const [reviews, setReviews] = useState([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     let ignore = false;
     (async () => {
       try {
-        const { data } = await api.get('/contests');
-        if (!ignore) setContests(data.slice(0, 4));
+        const [{ data: contestRows }, { data: reviewRows }] = await Promise.all([
+          api.get('/contests'),
+          api.get('/reviews'),
+        ]);
+        if (ignore) return;
+        setContests(contestRows.slice(0, 4));
+        setReviews(reviewRows.slice(0, 4));
       } catch {
-        if (!ignore) setContests([]);
+        if (!ignore) {
+          setContests([]);
+          setReviews([]);
+        }
       } finally {
         if (!ignore) setLoading(false);
       }
@@ -56,6 +66,19 @@ export default function Home() {
         <div className="card-list">
           {contests.map((contest) => (
             <ContestCard key={contest.id} contest={contest} />
+          ))}
+        </div>
+      </section>
+
+      <section style={{ marginTop: 36 }}>
+        <div className="page-head">
+          <h2 style={{ fontFamily: 'var(--serif)', margin: 0 }}>최신 후기</h2>
+          <Link to="/reviews">전체 보기</Link>
+        </div>
+        {!loading && reviews.length === 0 && <p className="empty">아직 작성된 후기가 없습니다.</p>}
+        <div className="card-list">
+          {reviews.map((review) => (
+            <ReviewCard key={review.id} review={review} />
           ))}
         </div>
       </section>

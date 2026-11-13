@@ -3,12 +3,14 @@ import { Link, useNavigate, useParams } from 'react-router-dom';
 import api from '../api';
 import { useAuth } from '../context/AuthContext';
 import Modal from '../components/Modal';
+import ReviewCard from '../components/ReviewCard';
 
 export default function ContestDetail() {
   const { id } = useParams();
   const { user } = useAuth();
   const navigate = useNavigate();
   const [contest, setContest] = useState(null);
+  const [reviewData, setReviewData] = useState({ reviews: [], averageDifficulty: null });
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(true);
   const [confirmOpen, setConfirmOpen] = useState(false);
@@ -17,8 +19,13 @@ export default function ContestDetail() {
     let ignore = false;
     (async () => {
       try {
-        const { data } = await api.get(`/contests/${id}`);
-        if (!ignore) setContest(data);
+        const [{ data: contestRow }, { data: reviewRow }] = await Promise.all([
+          api.get(`/contests/${id}`),
+          api.get(`/contests/${id}/reviews`),
+        ]);
+        if (ignore) return;
+        setContest(contestRow);
+        setReviewData(reviewRow);
       } catch (err) {
         if (!ignore) setError(err.response?.data?.message || '대회 정보를 불러오지 못했습니다.');
       } finally {
@@ -44,6 +51,7 @@ export default function ContestDetail() {
   if (error && !contest) return <p className="error">{error}</p>;
 
   const mine = user && contest && user.id === contest.user_id;
+  const myReview = user && reviewData.reviews.find((item) => item.user_id === user.id);
 
   return (
     <div className="page">
@@ -86,6 +94,33 @@ export default function ContestDetail() {
           </p>
         )}
         {contest.description && <p style={{ whiteSpace: 'pre-wrap' }}>{contest.description}</p>}
+      </section>
+
+      <section style={{ marginTop: 28 }}>
+        <div className="page-head">
+          <div>
+            <h2 style={{ fontFamily: 'var(--serif)', margin: 0 }}>이 대회의 후기</h2>
+            {reviewData.averageDifficulty != null && (
+              <p>평균 난이도 {Number(reviewData.averageDifficulty).toFixed(1)} / 5</p>
+            )}
+          </div>
+          {user && !myReview && (
+            <Link to={`/reviews/new?contestId=${id}`} className="btn btn-primary">
+              후기 작성
+            </Link>
+          )}
+          {myReview && (
+            <Link to={`/reviews/${myReview.id}`} className="btn btn-navy">
+              내 후기 보기
+            </Link>
+          )}
+        </div>
+        {reviewData.reviews.length === 0 && <p className="empty">아직 이 대회의 후기가 없습니다.</p>}
+        <div className="card-list">
+          {reviewData.reviews.map((review) => (
+            <ReviewCard key={review.id} review={review} />
+          ))}
+        </div>
       </section>
 
       {error && <p className="error">{error}</p>}

@@ -71,6 +71,34 @@ router.get('/', async (req, res, next) => {
   }
 });
 
+router.get('/:id/reviews', async (req, res, next) => {
+  try {
+    const [contests] = await pool.query('SELECT id FROM contests WHERE id = ?', [req.params.id]);
+    if (contests.length === 0) {
+      throw new HttpError(404, '대회 정보를 찾을 수 없습니다.');
+    }
+    const [reviews] = await pool.query(
+      `SELECT r.*, u.nickname, c.title AS contest_title
+       FROM reviews r
+       JOIN users u ON r.user_id = u.id
+       JOIN contests c ON r.contest_id = c.id
+       WHERE r.contest_id = ?
+       ORDER BY r.created_at DESC`,
+      [req.params.id]
+    );
+    const [avgRows] = await pool.query(
+      'SELECT AVG(difficulty) AS averageDifficulty FROM reviews WHERE contest_id = ?',
+      [req.params.id]
+    );
+    res.json({
+      reviews,
+      averageDifficulty: avgRows[0].averageDifficulty == null ? null : Number(avgRows[0].averageDifficulty),
+    });
+  } catch (err) {
+    next(err);
+  }
+});
+
 router.get('/:id', async (req, res, next) => {
   try {
     const [rows] = await pool.query(

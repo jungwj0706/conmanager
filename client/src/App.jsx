@@ -8,6 +8,9 @@ import MyPage from './pages/MyPage';
 import ContestList from './pages/ContestList';
 import ContestDetail from './pages/ContestDetail';
 import ContestForm from './pages/ContestForm';
+import ReviewList from './pages/ReviewList';
+import ReviewDetail from './pages/ReviewDetail';
+import ReviewForm from './pages/ReviewForm';
 
 export default function App() {
   return (
@@ -44,6 +47,24 @@ export default function App() {
             }
           />
           <Route path="/contests/:id" element={<ContestDetail />} />
+          <Route path="/reviews" element={<ReviewList />} />
+          <Route
+            path="/reviews/new"
+            element={
+              <ProtectedRoute>
+                <ReviewForm />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/reviews/:id/edit"
+            element={
+              <ProtectedRoute>
+                <ReviewForm />
+              </ProtectedRoute>
+            }
+          />
+          <Route path="/reviews/:id" element={<ReviewDetail />} />
         </Routes>
       </main>
     </>

@@ -10,6 +10,7 @@ app.use(express.json());
 app.use('/api/auth', require('./routes/auth'));
 app.use('/api/users', require('./routes/users'));
 app.use('/api/contests', require('./routes/contests'));
+app.use('/api/reviews', require('./routes/reviews'));
 
 app.use((err, req, res, next) => {
   if (err.status) {

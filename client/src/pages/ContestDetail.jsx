@@ -14,6 +14,8 @@ export default function ContestDetail() {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(true);
   const [confirmOpen, setConfirmOpen] = useState(false);
+  const [copyMessage, setCopyMessage] = useState('');
+  const [copying, setCopying] = useState(false);
 
   useEffect(() => {
     let ignore = false;
@@ -36,6 +38,19 @@ export default function ContestDetail() {
       ignore = true;
     };
   }, [id]);
+
+  const copyToMine = async () => {
+    setCopying(true);
+    setCopyMessage('');
+    try {
+      const { data } = await api.post(`/my-contests/from-contest/${id}`);
+      navigate(`/my-contests/${data.id}`);
+    } catch (err) {
+      setCopyMessage(err.response?.data?.message || '내 대회에 담지 못했습니다.');
+    } finally {
+      setCopying(false);
+    }
+  };
 
   const onDelete = async () => {
     try {
@@ -63,16 +78,23 @@ export default function ContestDetail() {
           </div>
           <h1>{contest.title}</h1>
         </div>
-        {mine && (
-          <div className="toolbar">
-            <Link to={`/contests/${id}/edit`} className="btn btn-navy">
-              수정
-            </Link>
-            <button type="button" className="btn btn-danger" onClick={() => setConfirmOpen(true)}>
-              삭제
+        <div className="toolbar">
+          {user && (
+            <button type="button" className="btn btn-primary" onClick={copyToMine} disabled={copying}>
+              내 대회에 담기
             </button>
-          </div>
-        )}
+          )}
+          {mine && (
+            <>
+              <Link to={`/contests/${id}/edit`} className="btn btn-navy">
+                수정
+              </Link>
+              <button type="button" className="btn btn-danger" onClick={() => setConfirmOpen(true)}>
+                삭제
+              </button>
+            </>
+          )}
+        </div>
       </div>
 
       <section className="card">
@@ -94,6 +116,7 @@ export default function ContestDetail() {
           </p>
         )}
         {contest.description && <p style={{ whiteSpace: 'pre-wrap' }}>{contest.description}</p>}
+        {copyMessage && <p className="error">{copyMessage}</p>}
       </section>
 
       <section style={{ marginTop: 28 }}>

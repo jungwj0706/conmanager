@@ -269,6 +269,10 @@ main {
   resize: vertical;
 }
 
+.card .field select {
+  max-width: 240px;
+}
+
 .grid-2 {
   display: grid;
   grid-template-columns: 1fr 1fr;

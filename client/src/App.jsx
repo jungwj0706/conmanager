@@ -11,6 +11,9 @@ import ContestForm from './pages/ContestForm';
 import ReviewList from './pages/ReviewList';
 import ReviewDetail from './pages/ReviewDetail';
 import ReviewForm from './pages/ReviewForm';
+import MyContestList from './pages/MyContestList';
+import MyContestForm from './pages/MyContestForm';
+import MyContestDetail from './pages/MyContestDetail';
 
 export default function App() {
   return (
@@ -65,6 +68,30 @@ export default function App() {
             }
           />
           <Route path="/reviews/:id" element={<ReviewDetail />} />
+          <Route
+            path="/my-contests"
+            element={
+              <ProtectedRoute>
+                <MyContestList />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/my-contests/new"
+            element={
+              <ProtectedRoute>
+                <MyContestForm />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/my-contests/:id"
+            element={
+              <ProtectedRoute>
+                <MyContestDetail />
+              </ProtectedRoute>
+            }
+          />
         </Routes>
       </main>
     </>

@@ -16,6 +16,7 @@ export default function Navbar() {
           </NavLink>
           <NavLink to="/contests">대회 정보</NavLink>
           <NavLink to="/reviews">후기</NavLink>
+          {user && <NavLink to="/my-contests">내 대회</NavLink>}
         </nav>
         <div className="nav-auth">
           {user ? (

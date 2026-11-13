@@ -17,6 +17,7 @@ app.use('/api/checklists', require('./routes/checklists'));
 app.use('/api/ideas', require('./routes/ideas').router);
 app.use('/api/memos', require('./routes/memos'));
 app.use('/api/home', require('./routes/home'));
+app.use('/api/calendar', require('./routes/calendar'));
 
 app.use((err, req, res, next) => {
   if (err.status) {

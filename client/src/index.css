@@ -410,8 +410,21 @@ main {
   font-weight: 700;
 }
 
+.cal-cell {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
 .cal-cell.conflict {
   outline: 2px solid var(--danger);
+}
+
+.cal-cell strong {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 4px;
 }
 
 .cal-item {

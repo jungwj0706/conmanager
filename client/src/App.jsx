@@ -14,6 +14,7 @@ import ReviewForm from './pages/ReviewForm';
 import MyContestList from './pages/MyContestList';
 import MyContestForm from './pages/MyContestForm';
 import MyContestDetail from './pages/MyContestDetail';
+import Calendar from './pages/Calendar';
 
 export default function App() {
   return (
@@ -89,6 +90,14 @@ export default function App() {
             element={
               <ProtectedRoute>
                 <MyContestDetail />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/calendar"
+            element={
+              <ProtectedRoute>
+                <Calendar />
               </ProtectedRoute>
             }
           />

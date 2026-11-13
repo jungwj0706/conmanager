@@ -1,8 +1,30 @@
+import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
+import api from '../api';
 import { useAuth } from '../context/AuthContext';
+import ContestCard from '../components/ContestCard';
 
 export default function Home() {
   const { user } = useAuth();
+  const [contests, setContests] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    let ignore = false;
+    (async () => {
+      try {
+        const { data } = await api.get('/contests');
+        if (!ignore) setContests(data.slice(0, 4));
+      } catch {
+        if (!ignore) setContests([]);
+      } finally {
+        if (!ignore) setLoading(false);
+      }
+    })();
+    return () => {
+      ignore = true;
+    };
+  }, []);
 
   return (
     <div className="page">
@@ -21,6 +43,20 @@ export default function Home() {
               회원가입
             </Link>
           )}
+        </div>
+      </section>
+
+      <section>
+        <div className="page-head">
+          <h2 style={{ fontFamily: 'var(--serif)', margin: 0 }}>최신 대회 정보</h2>
+          <Link to="/contests">전체 보기</Link>
+        </div>
+        {loading && <p className="loading">불러오는 중...</p>}
+        {!loading && contests.length === 0 && <p className="empty">아직 등록된 대회 정보가 없습니다.</p>}
+        <div className="card-list">
+          {contests.map((contest) => (
+            <ContestCard key={contest.id} contest={contest} />
+          ))}
         </div>
       </section>
     </div>

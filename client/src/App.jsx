@@ -5,6 +5,9 @@ import Home from './pages/Home';
 import Login from './pages/Login';
 import Signup from './pages/Signup';
 import MyPage from './pages/MyPage';
+import ContestList from './pages/ContestList';
+import ContestDetail from './pages/ContestDetail';
+import ContestForm from './pages/ContestForm';
 
 export default function App() {
   return (
@@ -23,6 +26,24 @@ export default function App() {
               </ProtectedRoute>
             }
           />
+          <Route path="/contests" element={<ContestList />} />
+          <Route
+            path="/contests/new"
+            element={
+              <ProtectedRoute>
+                <ContestForm />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/contests/:id/edit"
+            element={
+              <ProtectedRoute>
+                <ContestForm />
+              </ProtectedRoute>
+            }
+          />
+          <Route path="/contests/:id" element={<ContestDetail />} />
         </Routes>
       </main>
     </>
